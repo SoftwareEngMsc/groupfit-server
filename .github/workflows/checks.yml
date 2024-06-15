@@ -20,4 +20,4 @@ jobs:
       #     pip install -r ./web/requirements.txt
       - name: Run Tests'
         run: |
-          python ./groupfitness/manage.py test
+          python ../manage.py test
