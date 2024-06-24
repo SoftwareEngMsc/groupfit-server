@@ -5,6 +5,8 @@ Tests for models
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 
+from core import models
+
 
 class ModelTests(TestCase):
     """Test models"""
@@ -45,3 +47,21 @@ class ModelTests(TestCase):
         )
 
         self.assertTrue(user.is_superuser)
+
+    def test_create_group(self):
+        """Test to ensure group is created as expected"""
+
+        user = get_user_model().objects.create_user(
+            email='testUser@example.com',
+            # first_name='firstName',
+            # last_name='lastName',
+            date_of_birth='1988-09-21',
+        )
+
+        group = models.Group.objects.create(
+            group_name='Test Group',
+            target_workout_number_per_week=3,
+            created_by=user
+        )
+
+        self.assertEqual(str(group), group.group_name)

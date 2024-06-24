@@ -1,12 +1,14 @@
 """
 Database models for GroupFit server
 """
+import datetime
 from django.db import models
 from django.contrib.auth.models import (
     AbstractBaseUser,
     BaseUserManager,
     PermissionsMixin
 )
+from django.conf import settings
 
 
 class UserManager(BaseUserManager):
@@ -36,9 +38,20 @@ class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(max_length=255, unique=True)
     firstname = models.CharField(max_length=255)
     lastname = models.CharField(max_length=255)
-    join_date = models.DateField(null=True)
+    join_date = models.DateField(auto_now_add=True)
     date_of_birth = models.DateField(null=True)
     is_active = models.BooleanField(default=True)
 
     objects = UserManager()
     USERNAME_FIELD = 'email'
+
+
+class Group(models.Model):
+    """Fitness Group"""
+    group_name = models.CharField(max_length=100)
+    target_workout_number_per_week = models.PositiveIntegerField(null=True)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.DO_NOTHING)
+
+    def __str__(self):
+        return self.group_name
