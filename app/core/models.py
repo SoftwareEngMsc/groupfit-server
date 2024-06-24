@@ -1,7 +1,7 @@
 """
 Database models for GroupFit server
 """
-import datetime
+
 from django.db import models
 from django.contrib.auth.models import (
     AbstractBaseUser,
