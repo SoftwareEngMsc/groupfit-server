@@ -65,3 +65,28 @@ class ModelTests(TestCase):
         )
 
         self.assertEqual(str(group), group.group_name)
+        self.assertEqual(user.email, group.created_by.email)
+
+    def test_create_group_member(self):
+        """Tests that the goup member model is created"""
+
+        user = get_user_model().objects.create_user(
+            email='testUser@example.com',
+            date_of_birth='1988-09-21',
+        )
+
+        group = models.Group.objects.create(
+            group_name='Test Group',
+            target_workout_number_per_week=3,
+            created_by=user
+        )
+
+        group_member = models.GroupMember.objects.create(
+            member=user,
+            group=group,
+            member_role='Admin'
+        )
+
+        self.assertEqual(user.email, group_member.member.email)
+        self.assertEqual(str(group), group_member.group.group_name)
+        self.assertEqual(group_member.member_role, 'Admin')

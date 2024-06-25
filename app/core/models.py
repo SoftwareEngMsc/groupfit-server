@@ -55,3 +55,11 @@ class Group(models.Model):
 
     def __str__(self):
         return self.group_name
+
+
+class GroupMember(models.Model):
+    """Association of members to groups"""
+    member = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,)
+    group = models.ForeignKey(Group, on_delete=models.CASCADE)
+    member_role = models.CharField(max_length=25)
