@@ -57,7 +57,7 @@ class Group(models.Model):
         return self.group_name
 
 
-class GroupMember(models.Model):
+class GroupMembership(models.Model):
     """Association of members to groups"""
     member = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE,)

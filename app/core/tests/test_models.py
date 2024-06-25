@@ -55,6 +55,7 @@ class ModelTests(TestCase):
             email='testUser@example.com',
             # first_name='firstName',
             # last_name='lastName',
+            # password='testPass123',
             date_of_birth='1988-09-21',
         )
 
@@ -81,7 +82,7 @@ class ModelTests(TestCase):
             created_by=user
         )
 
-        group_member = models.GroupMember.objects.create(
+        group_member = models.GroupMembership.objects.create(
             member=user,
             group=group,
             member_role='Admin'

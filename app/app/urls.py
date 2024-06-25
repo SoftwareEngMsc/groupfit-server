@@ -31,5 +31,6 @@ urlpatterns = [
     ),
     path('core/', include('core.urls')),
     path('api/member/', include('member.urls')),
+    path('api/group/', include('group.urls')),
 
 ]
