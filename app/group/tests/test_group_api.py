@@ -10,7 +10,7 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from core.models import Group, GroupMembership
-from group.serializers import GroupSerializer, GroupMembershipSerializer
+from group.serializers import GroupMembershipSerializer
 
 GROUPS_URL = reverse('group:groupmembership-list')
 
