@@ -6,7 +6,7 @@ from rest_framework import viewsets
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 
-from core.models import Group, GroupMembership
+from core.models import GroupMembership
 from group import serializers
 
 
@@ -20,7 +20,7 @@ class GroupViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """Get groups for authenticated user"""
-        return self.queryset.filter(member=self.request.user)  # .order_by['-id']
+        return self.queryset.filter(member=self.request.user)
 
 
 def get_serializer_class(self):
