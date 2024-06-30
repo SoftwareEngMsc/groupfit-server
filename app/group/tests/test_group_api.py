@@ -13,8 +13,9 @@ from core.models import Group, GroupMembership
 from group.serializers import (GroupMembershipSerializer,
                                GroupMembersListSerializer)
 
-GROUPS_URL = reverse('group:groupmembership-list')
-GROUP_MEMBERS_URL = reverse('group:groupmembership-members')
+GROUPS_URL = reverse('group:group-list')
+GROUP_MEMBERS_URL = reverse('group:group-members')
+# GROUP_CREATE_URL = reverse('group:group')
 
 
 def create_group(user, **params):
@@ -125,8 +126,8 @@ class PrivateGroupAPITests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data, serializer.data)
 
-    def test_group_names_only_request(self):
-        """Tests that custom action returns group names only"""
+    def test_retrieve_group_members_request(self):
+        """Tests that custom action returns members within the group"""
         user2 = get_user_model().objects.create_user(
             email='testUser2@example.com',
             password='testPass111',
@@ -150,3 +151,18 @@ class PrivateGroupAPITests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data, serializer.data)
+
+    def test_create_group(self):
+        """Tests that a group is created successfully"""
+
+        group_params = {
+            'group_name': 'Test Group',
+            'target_workout_number_per_week': 3,
+            'created_by': self.user.id
+        }
+        res = self.client.post(GROUPS_URL, group_params)
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(res.data['group_name'], 'Test Group')
+        self.assertEqual(res.data['target_workout_number_per_week'], 3)
+        self.assertEqual(res.data['created_by'], self.user.id)

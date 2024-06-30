@@ -10,7 +10,7 @@ from group import views
 
 
 router = DefaultRouter()
-router.register('groups', views.GroupViewSet, basename='groupmembership')
+router.register('groups', views.GroupViewSet, basename='group')
 
 app_name = 'group'
 

@@ -27,12 +27,22 @@ class GroupViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['GET'])
     def members(self, request):
         """Custom action for getting list of members for a given group"""
-        serializer = self.get_serializer(self.queryset.all(), many=True)
+
+        group_id = self.request.query_params.get('group_id')
+        serializer = self.get_serializer(
+            self.queryset.filter(group_id=group_id), many=True)
         return Response(serializer.data)
+
+    def perform_create(self, serializer):
+        """creates the group and adds user as an admin"""
+
+        serializer.save(created_by=self.request.user)
 
     def get_serializer_class(self):
         """Return the serializer class  for  request"""
         if self.action == "members":
             return serializers.GroupMembersListSerializer
+        if self.action == "create":
+            return serializers.GroupSerializer
 
         return self.serializer_class
