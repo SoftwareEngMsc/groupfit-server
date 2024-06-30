@@ -16,6 +16,8 @@ from group.serializers import (GroupMembershipSerializer,
 GROUPS_URL = reverse('group:group-list')
 GROUP_MEMBERS_URL = reverse('group:group-members')
 GROUP_ADD_MEMBER_URL = reverse('group:group-addMember')
+GROUP_UPDATE_MEMBER_URL = reverse(
+    'group:group-updateMember', kwargs={'pk': None})
 
 
 def create_group(user, **params):
@@ -221,3 +223,54 @@ class PrivateGroupAPITests(TestCase):
         self.assertEqual(res.data['group'], group1.group_name)
         self.assertEqual(res.data['member'], self.user.email)
         self.assertEqual(res.data['member_role'], 'Member')
+
+    def test_update_group_member_role(self):
+        """Tests that a users role can be updated successfully"""
+        user2 = get_user_model().objects.create_user(
+            email='testUser2@example.com',
+            password='testPass111',
+            date_of_birth='1990-05-09',
+        )
+
+        group1 = create_group(self.user, group_name='Test Group')
+        create_group_membership(self.user, group1, 'Admin')
+        member_to_update = create_group_membership(user2, group1, 'Member')
+        new_member_role = 'Admin'
+
+        group_membership_params = {
+            'member': user2.id,
+            'group': group1.id,
+            'new_member_role': new_member_role
+        }
+
+        res = self.client.put(GROUP_UPDATE_MEMBER_URL, group_membership_params)
+        member_to_update.refresh_from_db()
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(member_to_update.member_role, new_member_role)
+        self.assertEqual(member_to_update.member.email, user2.email)
+
+    def test_update_group_member_role_no_admin_error(self):
+        """Tests that a users role is not updated if no admin remaining"""
+        user2 = get_user_model().objects.create_user(
+            email='testUser2@example.com',
+            password='testPass111',
+            date_of_birth='1990-05-09',
+        )
+
+        group1 = create_group(self.user, group_name='Test Group')
+        member_to_update = create_group_membership(self.user, group1, 'Admin')
+        create_group_membership(user2, group1, 'Member')
+        new_member_role = 'Member'
+
+        group_membership_params = {
+            'member': self.user.id,
+            'group': group1.id,
+            'new_member_role': new_member_role
+        }
+
+        res = self.client.put(GROUP_UPDATE_MEMBER_URL, group_membership_params)
+        member_to_update.refresh_from_db()
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertNotEqual(member_to_update.member_role, new_member_role)
+        self.assertEqual(member_to_update.member_role, 'Admin')
+        self.assertEqual(member_to_update.member.email, self.user.email)

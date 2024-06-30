@@ -37,19 +37,21 @@ class GroupViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['POST'])
     def addMember(self, request):
-        """creates the group and adds user as an admin"""
+        """Adds the membe to the group"""
         group_id = self.request.data.get('group')
         member_id = self.request.data.get('member')
         member_role = self.request.data.get('member_role')
 
+        member = get_user_model().objects.filter(id=member_id).first()
+
         # TODO: change member_role literals and all references to a constant
         if (member_role == 'Member'):
-            if (not self.check_admin_user_present(group_id)):
+            if (not self.check_admin_user_present(group_id, member)):
                 return Response({'message': 'Group must have an Admin member'},
                                 status=status.HTTP_403_FORBIDDEN)
 
         group = Group.objects.filter(id=group_id).first()
-        member = get_user_model().objects.filter(id=member_id).first()
+
         group_member = GroupMembership.objects.create(
             member=member,
             group=group,
@@ -58,6 +60,32 @@ class GroupViewSet(viewsets.ModelViewSet):
         group_member.save()
         serializer = self.get_serializer(group_member)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=['PUT'])
+    def updateMember(self, request, pk=None):
+        """updates member role in given group"""
+        group_id = self.request.data.get('group')
+        member_id = self.request.data.get('member')
+        new_member_role = self.request.data.get('new_member_role')
+
+        member = get_user_model().objects.filter(id=member_id).first()
+
+        # TODO: change member_role literals and all references to a constant
+        if (new_member_role == 'Member'):
+            if (not self.check_admin_user_present(group_id, member)):
+                return Response({'message': 'Group must have an Admin member'},
+                                status=status.HTTP_403_FORBIDDEN)
+        member_to_update = self.queryset.filter(group_id=group_id,
+                                                member_id=member_id).first()
+
+        serializer = self.get_serializer(instance=member_to_update,
+                                         data={'member_role': new_member_role},
+                                         partial=True
+                                         )
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def get_serializer_class(self):
         """Return the serializer class  for  request"""
@@ -68,16 +96,15 @@ class GroupViewSet(viewsets.ModelViewSet):
 
         return self.serializer_class
 
-    def check_admin_user_present(self, group_id):
+    def check_admin_user_present(self, group_id, member):
         """Checks whether there is an admin user in the group"""
         serializer = self.get_serializer(
             self.queryset.filter(group_id=group_id), many=True)
 
         if (serializer.data):
-            print(serializer.data)
             for membership in serializer.data:
-                print(membership)
-                if (membership['member_role'] == 'Admin'):
+                if (membership['member'] != member.email
+                        and membership['member_role'] == 'Admin'):
                     return True
             return False
         else:
