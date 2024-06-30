@@ -15,7 +15,7 @@ from group.serializers import (GroupMembershipSerializer,
 
 GROUPS_URL = reverse('group:group-list')
 GROUP_MEMBERS_URL = reverse('group:group-members')
-# GROUP_CREATE_URL = reverse('group:group')
+GROUP_ADD_MEMBER_URL = reverse('group:group-addMember')
 
 
 def create_group(user, **params):
@@ -83,7 +83,6 @@ class PrivateGroupAPITests(TestCase):
         res = self.client.get(GROUPS_URL)
         group_membership = GroupMembership.objects.all()  # .order_by['-id']
         serializer = GroupMembershipSerializer(group_membership, many=True)
-
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data, serializer.data)
 
@@ -166,3 +165,20 @@ class PrivateGroupAPITests(TestCase):
         self.assertEqual(res.data['group_name'], 'Test Group')
         self.assertEqual(res.data['target_workout_number_per_week'], 3)
         self.assertEqual(res.data['created_by'], self.user.id)
+
+    def test_add_member_to_group(self):
+        """Tests that a member can be added to a group"""
+
+        group1 = create_group(self.user, group_name='Test Group')
+
+        group_membership_params = {
+            'member': self.user.id,
+            'group': group1.id,
+            'member_role': 'Admin'
+        }
+
+        res = self.client.post(GROUP_ADD_MEMBER_URL, group_membership_params)
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(res.data['group'], group1.group_name)
+        self.assertEqual(res.data['member'], self.user.email)
+        self.assertEqual(res.data['member_role'], 'Admin')

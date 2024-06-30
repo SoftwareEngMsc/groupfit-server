@@ -20,8 +20,18 @@ class GroupSerializer(serializers.ModelSerializer):
 
 class GroupMembershipSerializer(serializers.ModelSerializer):
     """Serializer for Group Membership"""
-    group = GroupSerializer()
-    member = MemberSerializer()
+    # group = GroupSerializer()
+    # member = MemberSerializer()
+
+    group = serializers.SlugRelatedField(
+        read_only=True,
+        slug_field='group_name'
+    )
+
+    member = serializers.SlugRelatedField(
+        read_only=True,
+        slug_field='email'
+    )
 
     class Meta:
         model = GroupMembership
