@@ -40,13 +40,20 @@ class GroupViewSet(viewsets.ModelViewSet):
         """creates the group and adds user as an admin"""
         group_id = self.request.data.get('group')
         member_id = self.request.data.get('member')
+        member_role = self.request.data.get('member_role')
+
+        # TODO: change member_role literals and all references to a constant
+        if (member_role == 'Member'):
+            if (not self.check_admin_user_present(group_id)):
+                return Response({'message': 'Group must have an Admin member'},
+                                status=status.HTTP_403_FORBIDDEN)
 
         group = Group.objects.filter(id=group_id).first()
         member = get_user_model().objects.filter(id=member_id).first()
         group_member = GroupMembership.objects.create(
             member=member,
             group=group,
-            member_role=self.request.data.get('member_role'),
+            member_role=member_role,
         )
         group_member.save()
         serializer = self.get_serializer(group_member)
@@ -60,3 +67,18 @@ class GroupViewSet(viewsets.ModelViewSet):
             return serializers.GroupSerializer
 
         return self.serializer_class
+
+    def check_admin_user_present(self, group_id):
+        """Checks whether there is an admin user in the group"""
+        serializer = self.get_serializer(
+            self.queryset.filter(group_id=group_id), many=True)
+
+        if (serializer.data):
+            print(serializer.data)
+            for membership in serializer.data:
+                print(membership)
+                if (membership['member_role'] == 'Admin'):
+                    return True
+            return False
+        else:
+            return False

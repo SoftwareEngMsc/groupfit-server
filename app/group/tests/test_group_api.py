@@ -182,3 +182,42 @@ class PrivateGroupAPITests(TestCase):
         self.assertEqual(res.data['group'], group1.group_name)
         self.assertEqual(res.data['member'], self.user.email)
         self.assertEqual(res.data['member_role'], 'Admin')
+
+    def test_add_member_to_group_with_no_admin_present(self):
+        """Tests that a member cannot be added to a group without an admin"""
+
+        group1 = create_group(self.user, group_name='Test Group')
+
+        group_membership_params = {
+            'member': self.user.id,
+            'group': group1.id,
+            'member_role': 'Member'
+        }
+
+        res = self.client.post(GROUP_ADD_MEMBER_URL, group_membership_params)
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_add_member_to_group_with_admin_present(self):
+        """Tests that a member can be added to a group when admin is present"""
+
+        user2 = get_user_model().objects.create_user(
+            email='testUser2@example.com',
+            password='testPass111',
+            date_of_birth='1990-05-09',
+        )
+
+        group1 = create_group(self.user, group_name='Test Group')
+        create_group_membership(user2, group1, 'Admin')
+
+        group_membership_params = {
+            'member': self.user.id,
+            'group': group1.id,
+            'member_role': 'Member'
+        }
+
+        res = self.client.post(GROUP_ADD_MEMBER_URL, group_membership_params)
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(res.data['group'], group1.group_name)
+        self.assertEqual(res.data['member'], self.user.email)
+        self.assertEqual(res.data['member_role'], 'Member')
