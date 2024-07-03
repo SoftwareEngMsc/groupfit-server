@@ -2,7 +2,7 @@
 Views for the Group APIs
 """
 from django.contrib.auth import get_user_model
-
+from django.http import Http404
 from rest_framework.decorators import action
 from rest_framework import viewsets, status, mixins
 from rest_framework.response import Response
@@ -40,7 +40,7 @@ class GroupViewSet(mixins.CreateModelMixin,
             self.perform_destroy(group)
             return Response({'message': 'Group deleted successfully'},
                             status=status.HTTP_204_NO_CONTENT)
-        except:
+        except (Http404):
             return Response({'message': 'Group not found'
                              }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -129,10 +129,12 @@ class GroupViewSet(mixins.CreateModelMixin,
         group = Group.objects.filter(id=group_id).first()
 
         if group.created_by == member_to_delete.member.id:
-            return Response({'message': 'Groups owner cannot bdeleted from the group. Delete group'
-                             }, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {'message': 'Groups owner cannot be deleted from the group.'
+                 }, status=status.HTTP_400_BAD_REQUEST)
         member_to_delete.delete()
-        return Response({'res': 'Member successfully deleted from group'}, status=status.HTTP_200_OK)
+        return Response({'res': 'Member successfully deleted from group'},
+                        status=status.HTTP_200_OK)
 
     def get_serializer_class(self):
         """Return the serializer class  for  request"""

@@ -312,8 +312,9 @@ class PrivateGroupAPITests(TestCase):
 
         res = self.client.delete(
             GROUP_DELETE_MEMBER_URL, group_membership_params)
-        group_membership = GroupMembership.objects.filter(group=member_to_delete.group.id,
-                                                          member_id=member_to_delete.member.id)
+        group_membership = GroupMembership.objects.filter(
+            group=member_to_delete.group.id,
+            member_id=member_to_delete.member.id)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(group_membership.count(), 0)
