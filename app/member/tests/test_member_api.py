@@ -33,8 +33,8 @@ class PublicMemberApiTests(TestCase):
         payload = {
             'email': 'test@example.com',
             'password': 'testpass123',
-            'firstname': 'Test First Name',
-            'lastname': 'Test Last Name',
+            'first_name': 'Test First Name',
+            'last_name': 'Test Last Name',
             'date_of_birth': '1988-09-21',
         }
 
@@ -51,8 +51,8 @@ class PublicMemberApiTests(TestCase):
         payload = {
             'email': 'test@example.com',
             'password': 'testpass123',
-            'firstname': 'Test First Name',
-            'lastname': 'Test Last Name',
+            'first_name': 'Test First Name',
+            'last_name': 'Test Last Name',
             'date_of_birth': '1988-09-21',
         }
 
@@ -67,8 +67,8 @@ class PublicMemberApiTests(TestCase):
         payload = {
             'email': 'test@example.com',
             'password': 'pass',
-            'firstname': 'Test First Name',
-            'lastname': 'Test Last Name',
+            'first_name': 'Test First Name',
+            'last_name': 'Test Last Name',
             'date_of_birth': '1988-09-21',
         }
 
@@ -86,8 +86,8 @@ class PublicMemberApiTests(TestCase):
         member_details = {
             'email': 'test@example.com',
             'password': 'pass',
-            'firstname': 'Test First Name',
-            'lastname': 'Test Last Name',
+            'first_name': 'Test First Name',
+            'last_name': 'Test Last Name',
             'date_of_birth': '1988-09-21',
         }
 
@@ -136,8 +136,8 @@ class PrivateMemberApiTests(TestCase):
         self.member = create_member(
             email='test@example.com',
             password='testpass123',
-            firstname='Test First Name',
-            lastname='Test Last Name',
+            first_name='Test First Name',
+            last_name='Test Last Name',
             date_of_birth='1988-09-21',
         )
 
@@ -152,8 +152,8 @@ class PrivateMemberApiTests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data, {
             'email': self.member.email,
-            'firstname': self.member.firstname,
-            'lastname': self.member.lastname,
+            'first_name': self.member.first_name,
+            'last_name': self.member.last_name,
             'date_of_birth': self.member.date_of_birth,
         })
 
@@ -165,12 +165,12 @@ class PrivateMemberApiTests(TestCase):
 
     def test_update_member_profile(self):
         """Tests member profile can be updated when member authenticated"""
-        payload = {'firstname': 'updated firstname',
+        payload = {'first_name': 'updated first_name',
                    'password': 'newPassWord123'}
 
         res = self.client.patch(ME_URL, payload)
 
         self.member.refresh_from_db()
-        self.assertEqual(self.member.firstname, payload['firstname'])
+        self.assertEqual(self.member.first_name, payload['first_name'])
         self.assertTrue(self.member.check_password(payload['password']))
         self.assertEqual(res.status_code, status.HTTP_200_OK)

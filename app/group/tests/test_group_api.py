@@ -18,6 +18,8 @@ GROUP_MEMBERS_URL = reverse('group:group-members')
 GROUP_ADD_MEMBER_URL = reverse('group:group-addMember')
 GROUP_UPDATE_MEMBER_URL = reverse(
     'group:group-updateMember', kwargs={'pk': None})
+GROUP_DELETE_MEMBER_URL = reverse(
+    'group:group-deleteMember', kwargs={'pk': None})
 
 
 def create_group(user, **params):
@@ -168,6 +170,21 @@ class PrivateGroupAPITests(TestCase):
         self.assertEqual(res.data['target_workout_number_per_week'], 3)
         self.assertEqual(res.data['created_by'], self.user.id)
 
+    def test_delete_group(self):
+        """Tests that a group is deleted successfully"""
+        self.client.force_authenticate(self.user)
+        group1 = create_group(self.user, group_name='Test Group')
+        create_group_membership(self.user, group1, 'Admin')
+        group1.save()
+        GROUPS_DELETE_GROUP_URL = reverse(
+            'group:group-deleteGroup', kwargs={'pk': group1.id})
+
+        res = self.client.delete(GROUPS_DELETE_GROUP_URL)
+        group_loaded = Group.objects.filter(id=group1.id)
+
+        self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(group_loaded.count(), 0)
+
     def test_add_member_to_group(self):
         """Tests that a member can be added to a group"""
 
@@ -268,9 +285,35 @@ class PrivateGroupAPITests(TestCase):
             'new_member_role': new_member_role
         }
 
+        # TODO:Should really use PATCH here
         res = self.client.put(GROUP_UPDATE_MEMBER_URL, group_membership_params)
         member_to_update.refresh_from_db()
         self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
         self.assertNotEqual(member_to_update.member_role, new_member_role)
         self.assertEqual(member_to_update.member_role, 'Admin')
         self.assertEqual(member_to_update.member.email, self.user.email)
+
+    def test_delete_group_member(self):
+        """Tests that a group member can be deleted successfully"""
+        user2 = get_user_model().objects.create_user(
+            email='testUser2@example.com',
+            password='testPass111',
+            date_of_birth='1990-05-09',
+        )
+
+        group1 = create_group(self.user, group_name='Test Group')
+        create_group_membership(self.user, group1, 'Admin')
+        member_to_delete = create_group_membership(user2, group1, 'Member')
+
+        group_membership_params = {
+            'member': user2.id,
+            'group': group1.id,
+        }
+
+        res = self.client.delete(
+            GROUP_DELETE_MEMBER_URL, group_membership_params)
+        group_membership = GroupMembership.objects.filter(group=member_to_delete.group.id,
+                                                          member_id=member_to_delete.member.id)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(group_membership.count(), 0)

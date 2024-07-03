@@ -36,18 +36,19 @@ class UserManager(BaseUserManager):
 class User(AbstractBaseUser, PermissionsMixin):
     """Member in the system"""
     email = models.EmailField(max_length=255, unique=True)
-    firstname = models.CharField(max_length=255)
-    lastname = models.CharField(max_length=255)
+    first_name = models.CharField(max_length=255)
+    last_name = models.CharField(max_length=255)
     join_date = models.DateField(auto_now_add=True)
     date_of_birth = models.DateField(null=True)
     is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=True)
 
     objects = UserManager()
     USERNAME_FIELD = 'email'
 
 
 class Group(models.Model):
-    """Fitness Group"""
+    # """Fitness Group"""
     group_name = models.CharField(max_length=100)
     target_workout_number_per_week = models.PositiveIntegerField(null=True)
     created_by = models.ForeignKey(
