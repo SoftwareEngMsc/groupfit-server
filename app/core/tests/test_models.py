@@ -91,3 +91,67 @@ class ModelTests(TestCase):
         self.assertEqual(user.email, group_member.member.email)
         self.assertEqual(str(group), group_member.group.group_name)
         self.assertEqual(group_member.member_role, 'Admin')
+
+    def test_create_workout(self):
+        """Tests that the workout model can be created"""
+        user = get_user_model().objects.create_user(
+            email='testUser@example.com',
+            date_of_birth='1988-09-21',
+        )
+
+        group = models.Group.objects.create(
+            group_name='Test Group',
+            target_workout_number_per_week=3,
+            created_by=user
+        )
+
+        models.GroupMembership.objects.create(
+            member=user,
+            group=group,
+            member_role='Admin'
+        )
+
+        workout = models.Workout.objects.create(
+            name='Workout1',
+            description='full body workout',
+            link='http://test.co.uk',
+            group=group
+        )
+        self.assertEqual(workout.group.id, group.id)
+        self.assertIsNotNone(workout.created_date)
+
+    def test_create_workout_evidence(self):
+        """Tests that the workout evidence model can be created"""
+        user = get_user_model().objects.create_user(
+            email='testUser@example.com',
+            date_of_birth='1988-09-21',
+        )
+
+        group = models.Group.objects.create(
+            group_name='Test Group',
+            target_workout_number_per_week=3,
+            created_by=user
+        )
+
+        models.GroupMembership.objects.create(
+            member=user,
+            group=group,
+            member_role='Admin'
+        )
+
+        workout = models.Workout.objects.create(
+            name='Workout1',
+            description='full body workout',
+            link='http://test.co.uk',
+            group=group
+        )
+
+        workout_evidence = models.WorkoutEvidence.objects.create(
+            member=user,
+            workout=workout,
+            # evidence_item=
+            comment='Amazing workout!',
+        )
+        self.assertEqual(workout_evidence.member.id, user.id)
+        self.assertEqual(workout_evidence.workout.id, workout.id)
+        self.assertIsNotNone(workout_evidence.submission_date)

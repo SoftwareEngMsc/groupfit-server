@@ -48,7 +48,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 
 class Group(models.Model):
-    # """Fitness Group"""
+    """Fitness Group"""
     group_name = models.CharField(max_length=100)
     target_workout_number_per_week = models.PositiveIntegerField(null=True)
     created_by = models.ForeignKey(
@@ -64,3 +64,22 @@ class GroupMembership(models.Model):
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE,)
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
     member_role = models.CharField(max_length=25)
+
+
+class Workout(models.Model):
+    """exercise workout for group"""
+    name = models.CharField(max_length=255)
+    description = models.TextField()
+    link = models.URLField(max_length=255)
+    created_date = models.DateField(auto_now_add=True)
+    group = models.ForeignKey(Group, on_delete=models.CASCADE)
+
+
+class WorkoutEvidence(models.Model):
+    """Member evidence for workout completed"""
+    member = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,)
+    workout = models.ForeignKey(Workout, on_delete=models.CASCADE)
+    # evidence_item = tbc
+    comment = models.CharField(max_length=255)
+    submission_date = models.DateField(auto_now_add=True)
