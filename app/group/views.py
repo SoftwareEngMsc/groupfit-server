@@ -143,7 +143,7 @@ class GroupViewSet(mixins.CreateModelMixin,
         """Return the serializer class  for  request"""
         if self.action == "members":
             return serializers.GroupMembersListSerializer
-        if self.action == "create":
+        elif self.action == "create":
             return serializers.GroupSerializer
 
         return self.serializer_class
@@ -202,10 +202,34 @@ class GroupWorkoutViewSet(mixins.CreateModelMixin,
 
         return Response(serializer.data)
 
+    @action(detail=True, methods=['POST'])
+    def uploadEvidence(self, request, pk=None, *args, **kwargs):
+        """uploads workout evidence"""
+
+        workout_id = self.request.data.get('workout_id')
+        evidence = self.request.data.get('evidence_image')
+
+        workout_evidence = GroupWorkoutEvidence.objects.filter(
+            workout_id=workout_id, member_id=self.request.user.id).first()
+
+        serializer = self.get_serializer(
+            workout_evidence, data={'member': workout_evidence.member.id,
+                                    'workout': workout_evidence.workout.id,
+                                    'evidence_image': evidence})
+
+        if serializer.is_valid():
+            serializer.save()
+
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
     def get_serializer_class(self):
         """Return the serializer class  for  request"""
 
         if self.action == "evidence":
             return serializers.GroupWorkoutEvidenceSerializer
+        elif self.action == 'uploadEvidence':
+            return serializers.WorkoutEvidenceImageSerializer
 
         return self.serializer_class

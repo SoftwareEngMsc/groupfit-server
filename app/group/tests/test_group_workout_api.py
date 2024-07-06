@@ -2,6 +2,9 @@
 Tests for the Group API
 """
 
+import tempfile
+import os
+from PIL import Image
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
@@ -17,6 +20,8 @@ from group.serializers import (GroupWorkoutSerializer,
 GROUP_WORKOUT_URL = reverse('group:workout-workout', kwargs={'pk': None})
 GROUP_WORKOUT_EVIDENCE_URL = reverse(
     'group:workout-evidence', kwargs={'pk': None})
+GROUP_WORKOUT_UPLOAD_EVIDENCE_URL = reverse(
+    'group:workout-uploadEvidence', kwargs={'pk': None})
 
 
 def create_group(user, **params):
@@ -82,16 +87,7 @@ def create_workout_evidence(user, workout, **params):
     return workout_evidence
 
 
-def evidence_upload_url(member_id, group_id):
-    """Creates and returns anevidence upload url"""
-    kwargs = {
-        'member_id': member_id,
-        'group_id': group_id
-    }
-    return reverse('group:workout-upload-evidence', kwargs=kwargs)
-
-
-class PublicGroupAPITests(TestCase):
+class PublicGroupWorkoutAPITests(TestCase):
     """Tests the unauthenticated user requests in Group API"""
 
     def setUp(self):
@@ -104,7 +100,7 @@ class PublicGroupAPITests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
-class PrivateGroupAPITests(TestCase):
+class PrivateGroupWorkoutAPITests(TestCase):
     """Tests the authenticated user requests in Group API"""
 
     def setUp(self):
@@ -160,3 +156,65 @@ class PrivateGroupAPITests(TestCase):
             workout_evidence, many=True)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data, serializer.data)
+
+
+class UploadEvidenceTests(TestCase):
+    """Workout evidence upload tests"""
+
+    def setUp(self):
+        self.client = APIClient()
+        self.user = get_user_model().objects.create_user(
+            email='testUser@example.com',
+            # first_name='firstName',
+            # last_name='lastName',
+            password='testPass123',
+            date_of_birth='1988-09-21',
+        )
+        self.client.force_authenticate(self.user)
+        workout_params = {
+            'name': 'Test Workout',
+            'description': 'Full body workout',
+            'link': 'http://test.co.uk',
+        }
+        evidence_params = {
+            'comment': 'Fab workout!',
+        }
+        workout = create_workout(self.user, **workout_params)
+        self.workout_evidence = create_workout_evidence(
+            self.user, workout, **evidence_params)
+
+    def tearDown(self):
+        self.workout_evidence.evidence_image.delete()
+
+    def test_evidence_upload(self):
+        """Tests evidence is uploaded successfully"""
+
+        with tempfile.NamedTemporaryFile(suffix='.jpg') as evidence_file:
+            evidence = Image.new('RGB', (10, 20))
+            evidence.save(evidence_file, format='JPEG')
+            evidence_file.seek(0)
+            payload = {
+                'evidence_image': evidence_file,
+                'workout_id': self.workout_evidence.workout.id,
+            }
+
+            res = self.client.post(
+                GROUP_WORKOUT_UPLOAD_EVIDENCE_URL,
+                payload,  format='multipart')
+
+        self.workout_evidence.refresh_from_db()
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertIn('evidence_image', res.data)
+        self.assertTrue(os.path.exists(
+            self.workout_evidence.evidence_image.path))
+
+    def test_evidence_upload_invalid_request(self):
+        """Tests invalid evidence upload is handled"""
+
+        payload = {'evidence_image': 'invalid request',
+                   'workout_id': self.workout_evidence.workout.id,
+                   }
+        res = self.client.post(
+            GROUP_WORKOUT_UPLOAD_EVIDENCE_URL, payload,  format='multipart')
+
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
