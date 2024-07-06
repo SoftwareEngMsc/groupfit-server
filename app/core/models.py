@@ -1,6 +1,8 @@
 """
 Database models for GroupFit server
 """
+import uuid
+import os
 
 from django.db import models
 from django.contrib.auth.models import (
@@ -9,6 +11,14 @@ from django.contrib.auth.models import (
     PermissionsMixin
 )
 from django.conf import settings
+
+
+def workout_evidence_image_file_path(instance, filename):
+    """generate path for wokout evidence image file"""
+    extension = os.path.splitext(filename)[1]
+    filename = f'{uuid.uuid4()}{extension}'
+
+    return os.path.join('uploads', 'workout_evidence', filename)
 
 
 class UserManager(BaseUserManager):
@@ -66,7 +76,7 @@ class GroupMembership(models.Model):
     member_role = models.CharField(max_length=25)
 
 
-class Workout(models.Model):
+class GroupWorkout(models.Model):
     """exercise workout for group"""
     name = models.CharField(max_length=255)
     description = models.TextField()
@@ -75,11 +85,12 @@ class Workout(models.Model):
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
 
 
-class WorkoutEvidence(models.Model):
+class GroupWorkoutEvidence(models.Model):
     """Member evidence for workout completed"""
     member = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE,)
-    workout = models.ForeignKey(Workout, on_delete=models.CASCADE)
-    # evidence_item = tbc
+    workout = models.ForeignKey(GroupWorkout, on_delete=models.CASCADE)
+    evidence_image = models.ImageField(
+        null=True, upload_to=workout_evidence_image_file_path)
     comment = models.CharField(max_length=255)
     submission_date = models.DateField(auto_now_add=True)

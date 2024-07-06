@@ -11,6 +11,7 @@ from group import views
 
 router = DefaultRouter()
 router.register('groups', views.GroupViewSet, basename='group')
+router.register('groups', views.GroupWorkoutViewSet, basename='workout')
 
 app_name = 'group'
 

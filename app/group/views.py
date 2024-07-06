@@ -9,7 +9,10 @@ from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 
-from core.models import GroupMembership, Group
+from core.models import (GroupMembership,
+                         Group,
+                         GroupWorkout,
+                         GroupWorkoutEvidence)
 from group import serializers
 
 
@@ -158,3 +161,51 @@ class GroupViewSet(mixins.CreateModelMixin,
             return False
         else:
             return False
+
+
+class GroupWorkoutViewSet(mixins.CreateModelMixin,
+                          mixins.DestroyModelMixin,
+                          mixins.UpdateModelMixin,
+                          mixins.ListModelMixin,
+                          mixins.RetrieveModelMixin,
+                          viewsets.GenericViewSet):
+    """View for managing group workout APIs"""
+
+    serializer_class = serializers.GroupWorkoutSerializer
+    queryset = GroupWorkout.objects.all()
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        """Get group workouts for authenticated user"""
+
+        return self.queryset.filter(member=self.request.user)
+
+    @action(detail=True, methods=['GET'])
+    def workout(self, request, pk=None, *args, **kwargs):
+        """updates member role in given group"""
+        group_id = self.request.query_params['group_id']
+        queryset_res = self.queryset.filter(group_id=group_id)
+        serializer = self.get_serializer(queryset_res, many=True)
+
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['GET'])
+    def evidence(self, request, pk=None, *args, **kwargs):
+        """updates member role in given group"""
+        member_id = self.request.query_params['member_id']
+        workout_id = self.request.query_params['workout_id']
+
+        queryset_res = GroupWorkoutEvidence.objects.filter(
+            workout_id=workout_id, member_id=member_id)
+        serializer = self.get_serializer(queryset_res, many=True)
+
+        return Response(serializer.data)
+
+    def get_serializer_class(self):
+        """Return the serializer class  for  request"""
+
+        if self.action == "evidence":
+            return serializers.GroupWorkoutEvidenceSerializer
+
+        return self.serializer_class

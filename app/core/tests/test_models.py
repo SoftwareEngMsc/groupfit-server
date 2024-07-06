@@ -4,7 +4,7 @@ Tests for models
 
 from django.test import TestCase
 from django.contrib.auth import get_user_model
-
+from unittest.mock import patch
 from core import models
 
 
@@ -111,7 +111,7 @@ class ModelTests(TestCase):
             member_role='Admin'
         )
 
-        workout = models.Workout.objects.create(
+        workout = models.GroupWorkout.objects.create(
             name='Workout1',
             description='full body workout',
             link='http://test.co.uk',
@@ -139,14 +139,14 @@ class ModelTests(TestCase):
             member_role='Admin'
         )
 
-        workout = models.Workout.objects.create(
+        workout = models.GroupWorkout.objects.create(
             name='Workout1',
             description='full body workout',
             link='http://test.co.uk',
             group=group
         )
 
-        workout_evidence = models.WorkoutEvidence.objects.create(
+        workout_evidence = models.GroupWorkoutEvidence.objects.create(
             member=user,
             workout=workout,
             # evidence_item=
@@ -155,3 +155,13 @@ class ModelTests(TestCase):
         self.assertEqual(workout_evidence.member.id, user.id)
         self.assertEqual(workout_evidence.workout.id, workout.id)
         self.assertIsNotNone(workout_evidence.submission_date)
+
+    @patch('core.models.uuid.uuid4')
+    def test_workout_evidence_name_uuid(self, mock_uuid):
+        """Test image pathe generation"""
+        uuid = 'test-uuid'
+        mock_uuid.return_value = uuid
+        file_path = models.workout_evidence_image_file_path(
+            None, 'example.jpg')
+
+        self.assertEqual(file_path, f'uploads/workout_evidence/{uuid}.jpg')

@@ -4,7 +4,7 @@ Serializers for Group API
 
 from rest_framework import serializers
 
-from core.models import Group, GroupMembership
+from core.models import Group, GroupMembership, GroupWorkout, GroupWorkoutEvidence
 from member.serializers import MemberSerializer
 
 
@@ -47,3 +47,27 @@ class GroupMembersListSerializer(serializers.ModelSerializer):
     class Meta:
         model = GroupMembership
         fields = ['member']
+
+
+class GroupWorkoutSerializer(serializers.ModelSerializer):
+    """Serializer for workout list for group"""
+
+    group = GroupSerializer()
+
+    class Meta:
+        model = GroupWorkout
+        fields = ['id', 'name', 'group', 'description', 'link', 'created_date']
+        read_only_fields = ['id', 'created_date']
+
+
+class GroupWorkoutEvidenceSerializer(serializers.ModelSerializer):
+    """Serializer for workout evidence list for groupmembers"""
+
+    member = MemberSerializer()
+    workout = GroupWorkoutSerializer()
+
+    class Meta:
+        model = GroupWorkoutEvidence
+        fields = ['id', 'member', 'workout',
+                  'evidence_image', 'comment', 'submission_date']
+        read_only_fields = ['id', 'created_date']
