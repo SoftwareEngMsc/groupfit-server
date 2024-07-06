@@ -18,6 +18,10 @@ from group.serializers import (GroupWorkoutSerializer,
                                GroupWorkoutEvidenceSerializer)
 
 GROUP_WORKOUT_URL = reverse('group:workout-workout', kwargs={'pk': None})
+GROUP_ADD_WORKOUT_URL = reverse(
+    'group:workout-addWorkout', kwargs={'pk': None})
+GROUP_DELETE_WORKOUT_URL = reverse(
+    'group:workout-deleteWorkout', kwargs={'pk': None})
 GROUP_WORKOUT_EVIDENCE_URL = reverse(
     'group:workout-evidence', kwargs={'pk': None})
 GROUP_WORKOUT_UPLOAD_EVIDENCE_URL = reverse(
@@ -114,6 +118,31 @@ class PrivateGroupWorkoutAPITests(TestCase):
         )
         self.client.force_authenticate(self.user)
 
+    def test_add_workout_for_group(self):
+        """Tests adding a workout for a group"""
+        params = {
+            'name': 'Test Workout',
+            'description': 'Full body workout',
+            'link': 'http://test.co.uk',
+        }
+        # workout = create_workout(self.user, **params)
+
+        group = create_group(self.user)
+        create_group_membership(self.user, group, 'Admin')
+
+        payload = {
+            'name': params['name'],
+            'description': params['description'],
+            'link': params['link'],
+            'group_id': group.id,
+        }
+        res = self.client.post(GROUP_ADD_WORKOUT_URL, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(res.data['name'], params['name'])
+        self.assertEqual(res.data['description'], params['description'])
+        self.assertEqual(res.data['link'], params['link'])
+
     def test_get_workout_for_group(self):
         """Tests retrieving workouts for a group"""
         params = {
@@ -130,6 +159,24 @@ class PrivateGroupWorkoutAPITests(TestCase):
         serializer = GroupWorkoutSerializer(workouts, many=True)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data, serializer.data)
+
+    def test_delete_workout_for_group(self):
+        """Tests that a group workout can be deleted successfully"""
+        params = {
+            'name': 'Test Workout',
+            'description': 'Full body workout',
+            'link': 'http://test.co.uk',
+        }
+        workout_to_delete = create_workout(self.user, **params)
+
+        res = self.client.delete(
+            GROUP_DELETE_WORKOUT_URL, {'workout_id': workout_to_delete.id})
+
+        workout = GroupWorkout.objects.filter(
+            id=workout_to_delete.id)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(workout.count(), 0)
 
     def test_get_workout_evidence_for_group_member(self):
         """Tests retrieving workouts evidence for a group member"""

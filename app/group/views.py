@@ -190,6 +190,41 @@ class GroupWorkoutViewSet(mixins.CreateModelMixin,
 
         return Response(serializer.data)
 
+    @action(detail=True, methods=['POST'])
+    def addWorkout(self, request, pk=None, *args, **kwargs):
+        """Adds the workout to the group"""
+        name = self.request.data.get('name')
+        description = self.request.data.get('description')
+        group_id = self.request.data.get('group_id')
+        link = self.request.data.get('link')
+
+        group = Group.objects.filter(id=group_id).first()
+
+        workout = GroupWorkout.objects.create(
+            name=name,
+            description=description,
+            link=link,
+            group=group,
+        )
+
+        workout.save()
+        serializer = self.get_serializer(workout)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=['DELETE'])
+    def deleteWorkout(self, request, pk=None):
+        """deletes workout in given group"""
+        workout_id = self.request.data.get('workout_id')
+
+        workout_to_delete = self.queryset.filter(id=workout_id).first()
+        if not workout_to_delete:
+            return Response({'message': 'Workout does not exist in given group'
+                             }, status=status.HTTP_400_BAD_REQUEST)
+
+        workout_to_delete.delete()
+        return Response({'res': 'Workout successfully deleted from group'},
+                        status=status.HTTP_200_OK)
+
     @action(detail=True, methods=['GET'])
     def evidence(self, request, pk=None, *args, **kwargs):
         """updates member role in given group"""
