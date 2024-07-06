@@ -11,8 +11,7 @@ from rest_framework.test import APIClient
 
 from core.models import (Group, GroupMembership,
                          GroupWorkout, GroupWorkoutEvidence)
-from group.serializers import (GroupMembersListSerializer,
-                               GroupWorkoutSerializer,
+from group.serializers import (GroupWorkoutSerializer,
                                GroupWorkoutEvidenceSerializer)
 
 GROUP_WORKOUT_URL = reverse('group:workout-workout', kwargs={'pk': None})
@@ -83,6 +82,15 @@ def create_workout_evidence(user, workout, **params):
     return workout_evidence
 
 
+def evidence_upload_url(member_id, group_id):
+    """Creates and returns anevidence upload url"""
+    kwargs = {
+        'member_id': member_id,
+        'group_id': group_id
+    }
+    return reverse('group:workout-upload-evidence', kwargs=kwargs)
+
+
 class PublicGroupAPITests(TestCase):
     """Tests the unauthenticated user requests in Group API"""
 
@@ -141,8 +149,10 @@ class PrivateGroupAPITests(TestCase):
         create_workout_evidence(
             self.user, workout, **evidence_params)
 
+        # TODO:  Create URL helper functions - check entire codebase
         res = self.client.get(GROUP_WORKOUT_EVIDENCE_URL, {
-                              'member_id': self.user.id, 'workout_id': workout.id})
+                              'member_id': self.user.id,
+                              'workout_id': workout.id})
         workout_evidence = GroupWorkoutEvidence.objects.filter(
             workout=workout, member=self.user)
 
