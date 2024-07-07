@@ -1,5 +1,6 @@
 """Views for the Friends API"""
 from datetime import datetime
+from django.http import Http404
 from django.db.models import Q
 from django.contrib.auth import get_user_model
 from rest_framework.decorators import action
@@ -102,23 +103,22 @@ class FriendsViewSet(mixins.CreateModelMixin,
                                          )
 
         if serializer.is_valid():
-
             serializer.save()
-            print(serializer.data)
-            print('********')
+
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    # @action(detail=True, methods=['DELETE'])
-    # def deleteGroup(self, request, *args, **kwargs):
-    #     """deletes the group"""
+    @action(detail=True, methods=['DELETE'])
+    def deleteFriend(self, request, *args, **kwargs):
+        """deletes the friend connection"""
 
-    #     group_id = kwargs.get('pk')
-    #     try:
-    #         group = Group.objects.filter(id=group_id).first()
-    #         self.perform_destroy(group)
-    #         return Response({'message': 'Group deleted successfully'},
-    #                         status=status.HTTP_204_NO_CONTENT)
-    #     except (Http404):
-    #         return Response({'message': 'Group not found'
-    #                          }, status=status.HTTP_400_BAD_REQUEST)
+        friend_connection_id = kwargs.get('pk')
+        try:
+            friend_connection = Friends.objects.filter(
+                id=friend_connection_id).first()
+            self.perform_destroy(friend_connection)
+            return Response({'message': 'Friend Connection deleted'},
+                            status=status.HTTP_204_NO_CONTENT)
+        except (Http404):
+            return Response({'message': 'Friend connection not found'
+                             }, status=status.HTTP_400_BAD_REQUEST)

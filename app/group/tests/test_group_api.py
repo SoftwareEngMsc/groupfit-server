@@ -316,5 +316,5 @@ class PrivateGroupAPITests(TestCase):
             group=member_to_delete.group.id,
             member_id=member_to_delete.member.id)
 
-        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(group_membership.count(), 0)

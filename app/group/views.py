@@ -137,7 +137,7 @@ class GroupViewSet(mixins.CreateModelMixin,
                  }, status=status.HTTP_400_BAD_REQUEST)
         member_to_delete.delete()
         return Response({'res': 'Member successfully deleted from group'},
-                        status=status.HTTP_200_OK)
+                        status=status.HTTP_204_NO_CONTENT)
 
     def get_serializer_class(self):
         """Return the serializer class  for  request"""
@@ -223,7 +223,7 @@ class GroupWorkoutViewSet(mixins.CreateModelMixin,
 
         workout_to_delete.delete()
         return Response({'res': 'Workout successfully deleted from group'},
-                        status=status.HTTP_200_OK)
+                        status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True, methods=['GET'])
     def evidence(self, request, pk=None, *args, **kwargs):

@@ -160,4 +160,34 @@ class PrivateFriendsAPITests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(friend_connection.status, updated_status)
 
-    # def test_delete_friend(self):
+    def test_delete_friend(self):
+        """Tests a friend can be deleted"""
+        params = {
+            'email': 'user2@example.com',
+            'first_name': 'firstName2',
+            'last_name': 'lastName2',
+            'password': 'testPass1234',
+            'date_of_birth': '1998-09-21',
+        }
+        user2 = create_user(**params)
+
+        friend_connection_to_delete = create_friend_connection(
+            self.user, user2)
+
+        updated_status = 'Rejected'
+        response = {
+            'friend_conn_id': friend_connection_to_delete.id,
+            'user_id': user2.id,
+            'status': updated_status,
+        }
+
+        FRIENDS_DELETE_URL = reverse(
+            'friends:friends-deleteFriend',
+            kwargs={'pk': friend_connection_to_delete.id})
+        res = self.client.delete(FRIENDS_DELETE_URL, response)
+
+        friend_connection = Friends.objects.filter(
+            id=friend_connection_to_delete.id)
+
+        self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(friend_connection.count(), 0)

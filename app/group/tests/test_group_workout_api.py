@@ -175,7 +175,7 @@ class PrivateGroupWorkoutAPITests(TestCase):
         workout = GroupWorkout.objects.filter(
             id=workout_to_delete.id)
 
-        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(workout.count(), 0)
 
     def test_get_workout_evidence_for_group_member(self):
