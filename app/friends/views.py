@@ -37,7 +37,7 @@ class FriendsViewSet(mixins.CreateModelMixin,
 
         serializer = self.get_serializer(
             self.queryset.filter(user1=user), many=True)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     # @action(detail=True, methods=['DELETE'])
     # def deleteGroup(self, request, *args, **kwargs):

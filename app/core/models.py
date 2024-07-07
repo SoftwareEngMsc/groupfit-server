@@ -12,7 +12,8 @@ from django.contrib.auth.models import (
 )
 from django.conf import settings
 
-# TODO: Create ENUMs for Member Role and Friend Status types - can I enforce this type at this model level????
+# TODO: Create ENUMs for Member Role and Friend Status types -
+# can I enforce this type at this model level????
 
 
 def workout_evidence_image_file_path(instance, filename):
