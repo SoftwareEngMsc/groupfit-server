@@ -11,6 +11,8 @@ from friends.serializers import FriendsSerializer
 
 FRIENDS_URL = reverse('friends:friends-getFriends')
 FRIENDS_ADD_URL = reverse('friends:friends-addFriend', kwargs={'pk': None})
+FRIENDS_ACCEPT_REJECT_RESPONSE_URL = reverse(
+    'friends:friends-response', kwargs={'pk': None})
 
 
 def create_friend_connection(requestingUser, otherUser):
@@ -105,3 +107,57 @@ class PrivateFriendsAPITests(TestCase):
         self.assertEqual(res.data['requested_by'].get(
             'email'), self.user.email)
         self.assertEqual(res.data['status'], 'Pending')
+
+    def test_accept_friend_request(self):
+        """Tests friend request can be accepted"""
+        params = {
+            'email': 'user2@example.com',
+            'first_name': 'firstName2',
+            'last_name': 'lastName2',
+            'password': 'testPass1234',
+            'date_of_birth': '1998-09-21',
+        }
+        user2 = create_user(**params)
+
+        friend_connection = create_friend_connection(self.user, user2)
+
+        updated_status = 'Accepted'
+        response = {
+            'friend_conn_id': friend_connection.id,
+            'user_id': user2.id,
+            'status': updated_status,
+        }
+        res = self.client.patch(FRIENDS_ACCEPT_REJECT_RESPONSE_URL, response)
+
+        friend_connection.refresh_from_db()
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(friend_connection.status, updated_status)
+
+    def test_reject_friend_request(self):
+        """Tests friend request can be accepted"""
+        params = {
+            'email': 'user2@example.com',
+            'first_name': 'firstName2',
+            'last_name': 'lastName2',
+            'password': 'testPass1234',
+            'date_of_birth': '1998-09-21',
+        }
+        user2 = create_user(**params)
+
+        friend_connection = create_friend_connection(self.user, user2)
+
+        updated_status = 'Rejected'
+        response = {
+            'friend_conn_id': friend_connection.id,
+            'user_id': user2.id,
+            'status': updated_status,
+        }
+        res = self.client.patch(FRIENDS_ACCEPT_REJECT_RESPONSE_URL, response)
+
+        friend_connection.refresh_from_db()
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(friend_connection.status, updated_status)
+
+    # def test_delete_friend(self):
