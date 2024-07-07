@@ -10,6 +10,7 @@ from core.models import Friends
 from friends.serializers import FriendsSerializer
 
 FRIENDS_URL = reverse('friends:friends-getFriends')
+FRIENDS_ADD_URL = reverse('friends:friends-addFriend', kwargs={'pk': None})
 
 
 def create_friend_connection(requestingUser, otherUser):
@@ -48,7 +49,6 @@ class PublicFriendsAPITests(TestCase):
     def test_authentication(self):
         """Tests that only authenticated user can call the Friends API"""
 
-        print(FRIENDS_URL)
         res = self.client.get(FRIENDS_URL, {'user_id': 1})
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
@@ -80,3 +80,28 @@ class PrivateFriendsAPITests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data, serializer.data)
+
+    def test_add_friend_connection(self):
+        """Test add a new friend connections"""
+        params = {
+            'email': 'user2@example.com',
+            'first_name': 'firstName2',
+            'last_name': 'lastName2',
+            'password': 'testPass1234',
+            'date_of_birth': '1998-09-21',
+        }
+        user2 = create_user(**params)
+
+        payload = {
+            'requested_by_id': self.user.id,
+            'user2_id': user2.id
+        }
+
+        res = self.client.post(FRIENDS_ADD_URL, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(res.data['user1'].get('email'), self.user.email)
+        self.assertEqual(res.data['user2'].get('email'), user2.email)
+        self.assertEqual(res.data['requested_by'].get(
+            'email'), self.user.email)
+        self.assertEqual(res.data['status'], 'Pending')
