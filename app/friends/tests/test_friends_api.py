@@ -1,0 +1,82 @@
+"""Tests for the Firnds API"""
+from django.contrib.auth import get_user_model
+from django.test import TestCase
+from django.urls import reverse
+
+from rest_framework import status
+from rest_framework.test import APIClient
+
+from core.models import Friends
+from friends.serializers import FriendsSerializer
+
+FRIENDS_URL = reverse('friends:friends-getFriends')
+
+
+def create_friend_connection(requestingUser, otherUser):
+    params = {
+        'user1': requestingUser,
+        'user2': otherUser,
+        'status': 'Pending',
+        'requested_by': requestingUser,
+    }
+
+    friend_connection = Friends.objects.create(**params)
+    return friend_connection
+
+
+def create_user(**params):
+    defaults = {
+        'email': 'testUser@example.com',
+        'first_name': 'firstName',
+        'last_name': 'lastName',
+        'password': 'testPass123',
+        'date_of_birth': '1988-09-21',
+    }
+
+    defaults.update(params)
+
+    user = get_user_model().objects.create_user(**defaults)
+    return user
+
+
+class PublicFriendsAPITests(TestCase):
+    """Tests the unauthenticated user requests in Friends API"""
+
+    def setUp(self):
+        self.client = APIClient()
+
+    def test_authentication(self):
+        """Tests that only authenticated user can call the Friends API"""
+
+        print(FRIENDS_URL)
+        res = self.client.get(FRIENDS_URL, {'user_id': 1})
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class PrivateFriendsAPITests(TestCase):
+    """Tests the authenticated user requests in Group API"""
+
+    def setUp(self):
+        self.client = APIClient()
+        self.user = create_user()
+        self.client.force_authenticate(self.user)
+
+    def test_get_friends_for_user(self):
+        """Test getting the friend connections for a user"""
+        params = {
+            'email': 'user2@example.com',
+            'first_name': 'firstName2',
+            'last_name': 'lastName2',
+            'password': 'testPass1234',
+            'date_of_birth': '1998-09-21',
+        }
+        user2 = create_user(**params)
+
+        create_friend_connection(self.user, user2)
+        friend_connection = Friends.objects.filter(user1=self.user)
+        serializer = FriendsSerializer(friend_connection, many=True)
+
+        res = self.client.get(FRIENDS_URL, {'user_id': self.user.id})
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data, serializer.data)

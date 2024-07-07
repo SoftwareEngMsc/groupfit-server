@@ -1,5 +1,5 @@
 """
-URL mappins for  the Group app
+URL mappings for  the Group app
 """
 
 from django.urls import (path, include)

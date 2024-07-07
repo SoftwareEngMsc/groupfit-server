@@ -46,4 +46,15 @@ class UserAdmin(BaseUserAdmin):
     )
 
 
+class Groups():
+    """Define admin pages for Group"""
+    ordering = ['id']
+    list_display = ['id', 'group_name',
+                    'target_workout_number_per_week', 'created_by']
+
+
 admin.site.register(models.User, UserAdmin)
+admin.site.register(models.Group)
+admin.site.register(models.GroupMembership)
+admin.site.register(models.GroupWorkout)
+admin.site.register(models.GroupWorkoutEvidence)

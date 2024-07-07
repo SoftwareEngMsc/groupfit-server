@@ -12,6 +12,8 @@ from django.contrib.auth.models import (
 )
 from django.conf import settings
 
+# TODO: Create ENUMs for Member Role and Friend Status types - can I enforce this type at this model level????
+
 
 def workout_evidence_image_file_path(instance, filename):
     """generate path for wokout evidence image file"""
@@ -94,3 +96,18 @@ class GroupWorkoutEvidence(models.Model):
         null=True, upload_to=workout_evidence_image_file_path)
     comment = models.CharField(max_length=255)
     submission_date = models.DateField(auto_now_add=True)
+
+
+class Friends(models.Model):
+    """Friendship connections"""
+    user1 = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,)
+    user2 = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+        related_name='User_Model')
+    connected_date = models.DateField(null=True)
+    status = models.CharField(max_length=50)
+    requested_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+        related_name='Requesting_User')
+    request_date = models.DateField(auto_now_add=True)

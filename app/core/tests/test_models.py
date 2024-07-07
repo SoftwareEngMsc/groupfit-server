@@ -158,10 +158,35 @@ class ModelTests(TestCase):
 
     @patch('core.models.uuid.uuid4')
     def test_workout_evidence_name_uuid(self, mock_uuid):
-        """Test image pathe generation"""
+        """Test image path generation"""
         uuid = 'test-uuid'
         mock_uuid.return_value = uuid
         file_path = models.workout_evidence_image_file_path(
             None, 'example.jpg')
 
         self.assertEqual(file_path, f'uploads/workout_evidence/{uuid}.jpg')
+
+    def test_create_friendship(self):
+        """Test friendship creation"""
+        user1 = get_user_model().objects.create_user(
+            email='testUser1@example.com',
+            date_of_birth='1998-09-16',
+        )
+
+        user2 = get_user_model().objects.create_user(
+            email='testUser2@example.com',
+            date_of_birth='1988-09-21',
+        )
+
+        connection = models.Friends.objects.create(
+            user1=user1,
+            user2=user2,
+            connected_date='2024-07-06',
+            status='Accepted',
+            requested_by=user1,
+            request_date='2024-07-05'
+
+        )
+
+        self.assertEqual(connection.user1.id, user1.id)
+        self.assertEqual(connection.user2.id, user2.id)

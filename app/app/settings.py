@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'member',
     'group',
+    'friends',
 ]
 
 MIDDLEWARE = [
