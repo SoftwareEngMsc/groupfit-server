@@ -71,7 +71,7 @@ class PrivateGroupAPITests(TestCase):
             # first_name='firstName',
             # last_name='lastName',
             password='testPass123',
-            date_of_birth='1988-09-21',
+            # date_of_birth='1988-09-21',
         )
         self.client.force_authenticate(self.user)
 
@@ -95,7 +95,7 @@ class PrivateGroupAPITests(TestCase):
         user2 = get_user_model().objects.create_user(
             email='testUser2@example.com',
             password='testPass111',
-            date_of_birth='1990-05-09',
+            # date_of_birth='1990-05-09',
         )
         group1 = create_group(self.user, group_name="Test Group 1")
         create_group_membership(self.user, group1, 'Admin')
@@ -115,7 +115,7 @@ class PrivateGroupAPITests(TestCase):
         user2 = get_user_model().objects.create_user(
             email='testUser2@example.com',
             password='testPass111',
-            date_of_birth='1990-05-09',
+            # date_of_birth='1990-05-09',
         )
         group1 = create_group(user2, group_name="Test Group 1")
         create_group_membership(user2, group1, 'Admin')
@@ -134,12 +134,12 @@ class PrivateGroupAPITests(TestCase):
         user2 = get_user_model().objects.create_user(
             email='testUser2@example.com',
             password='testPass111',
-            date_of_birth='1990-05-09',
+            # date_of_birth='1990-05-09',
         )
         user3 = get_user_model().objects.create_user(
             email='testUser3@example.com',
             password='testPass221',
-            date_of_birth='1993-02-11',
+            # date_of_birth='1993-02-11',
         )
 
         group1 = create_group(user2, group_name="Test Group 1")
@@ -222,7 +222,7 @@ class PrivateGroupAPITests(TestCase):
         user2 = get_user_model().objects.create_user(
             email='testUser2@example.com',
             password='testPass111',
-            date_of_birth='1990-05-09',
+            # date_of_birth='1990-05-09',
         )
 
         group1 = create_group(self.user, group_name='Test Group')
@@ -246,7 +246,7 @@ class PrivateGroupAPITests(TestCase):
         user2 = get_user_model().objects.create_user(
             email='testUser2@example.com',
             password='testPass111',
-            date_of_birth='1990-05-09',
+            # date_of_birth='1990-05-09',
         )
 
         group1 = create_group(self.user, group_name='Test Group')
@@ -271,7 +271,7 @@ class PrivateGroupAPITests(TestCase):
         user2 = get_user_model().objects.create_user(
             email='testUser2@example.com',
             password='testPass111',
-            date_of_birth='1990-05-09',
+            # date_of_birth='1990-05-09',
         )
 
         group1 = create_group(self.user, group_name='Test Group')
@@ -298,7 +298,7 @@ class PrivateGroupAPITests(TestCase):
         user2 = get_user_model().objects.create_user(
             email='testUser2@example.com',
             password='testPass111',
-            date_of_birth='1990-05-09',
+            # date_of_birth='1990-05-09',
         )
 
         group1 = create_group(self.user, group_name='Test Group')

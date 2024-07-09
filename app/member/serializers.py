@@ -14,12 +14,15 @@ class MemberSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = get_user_model()
-        fields = ['email', 'password', 'first_name',
-                  'last_name', 'date_of_birth']
+        fields = ['id', 'email', 'password', 'first_name',
+                  'last_name', 'join_date']
+        read_only_fields = ['id', 'join_date']
         extra_kwargs = {'password': {'write_only': True, 'min_length': 8}}
 
     def create(self, validated_data):
         """create and return a member with encrypted password"""
+        print(validated_data)
+
         return get_user_model().objects.create_user(**validated_data)
 
     def update(self, instance, validated_data):

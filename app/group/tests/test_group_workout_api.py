@@ -114,7 +114,7 @@ class PrivateGroupWorkoutAPITests(TestCase):
             # first_name='firstName',
             # last_name='lastName',
             password='testPass123',
-            date_of_birth='1988-09-21',
+            # date_of_birth='1988-09-21',
         )
         self.client.force_authenticate(self.user)
 
@@ -215,7 +215,7 @@ class UploadEvidenceTests(TestCase):
             # first_name='firstName',
             # last_name='lastName',
             password='testPass123',
-            date_of_birth='1988-09-21',
+            # date_of_birth='1988-09-21',
         )
         self.client.force_authenticate(self.user)
         workout_params = {

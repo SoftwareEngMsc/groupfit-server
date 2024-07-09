@@ -53,10 +53,10 @@ class ModelTests(TestCase):
 
         user = get_user_model().objects.create_user(
             email='testUser@example.com',
-            # first_name='firstName',
-            # last_name='lastName',
-            # password='testPass123',
-            date_of_birth='1988-09-21',
+            first_name='firstName',
+            last_name='lastName',
+            password='testPass123',
+            # #date_of_birth='1988-09-21',
         )
 
         group = models.Group.objects.create(
@@ -73,7 +73,7 @@ class ModelTests(TestCase):
 
         user = get_user_model().objects.create_user(
             email='testUser@example.com',
-            date_of_birth='1988-09-21',
+            # date_of_birth='1988-09-21',
         )
 
         group = models.Group.objects.create(
@@ -96,7 +96,7 @@ class ModelTests(TestCase):
         """Tests that the workout model can be created"""
         user = get_user_model().objects.create_user(
             email='testUser@example.com',
-            date_of_birth='1988-09-21',
+            # #date_of_birth='1988-09-21',
         )
 
         group = models.Group.objects.create(
@@ -124,7 +124,7 @@ class ModelTests(TestCase):
         """Tests that the workout evidence model can be created"""
         user = get_user_model().objects.create_user(
             email='testUser@example.com',
-            date_of_birth='1988-09-21',
+            # #date_of_birth='1988-09-21',
         )
 
         group = models.Group.objects.create(
@@ -170,12 +170,12 @@ class ModelTests(TestCase):
         """Test friendship creation"""
         user1 = get_user_model().objects.create_user(
             email='testUser1@example.com',
-            date_of_birth='1998-09-16',
+            # #date_of_birth='1998-09-16',
         )
 
         user2 = get_user_model().objects.create_user(
             email='testUser2@example.com',
-            date_of_birth='1988-09-21',
+            # #date_of_birth='1988-09-21',
         )
 
         connection = models.Friends.objects.create(

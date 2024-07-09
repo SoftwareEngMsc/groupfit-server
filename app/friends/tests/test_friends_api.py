@@ -33,7 +33,7 @@ def create_user(**params):
         'first_name': 'firstName',
         'last_name': 'lastName',
         'password': 'testPass123',
-        'date_of_birth': '1988-09-21',
+        # 'date_of_birth': '1988-09-21',
     }
 
     defaults.update(params)
@@ -70,7 +70,7 @@ class PrivateFriendsAPITests(TestCase):
             'first_name': 'firstName2',
             'last_name': 'lastName2',
             'password': 'testPass1234',
-            'date_of_birth': '1998-09-21',
+            # 'date_of_birth': '1998-09-21',
         }
         user2 = create_user(**params)
 
@@ -90,7 +90,7 @@ class PrivateFriendsAPITests(TestCase):
             'first_name': 'firstName2',
             'last_name': 'lastName2',
             'password': 'testPass1234',
-            'date_of_birth': '1998-09-21',
+            # 'date_of_birth': '1998-09-21',
         }
         user2 = create_user(**params)
 
@@ -115,7 +115,7 @@ class PrivateFriendsAPITests(TestCase):
             'first_name': 'firstName2',
             'last_name': 'lastName2',
             'password': 'testPass1234',
-            'date_of_birth': '1998-09-21',
+            # 'date_of_birth': '1998-09-21',
         }
         user2 = create_user(**params)
 
@@ -141,7 +141,7 @@ class PrivateFriendsAPITests(TestCase):
             'first_name': 'firstName2',
             'last_name': 'lastName2',
             'password': 'testPass1234',
-            'date_of_birth': '1998-09-21',
+            # 'date_of_birth': '1998-09-21',
         }
         user2 = create_user(**params)
 
@@ -167,7 +167,7 @@ class PrivateFriendsAPITests(TestCase):
             'first_name': 'firstName2',
             'last_name': 'lastName2',
             'password': 'testPass1234',
-            'date_of_birth': '1998-09-21',
+            # 'date_of_birth': '1998-09-21',
         }
         user2 = create_user(**params)
 

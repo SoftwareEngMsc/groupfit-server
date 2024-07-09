@@ -52,7 +52,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
     join_date = models.DateField(auto_now_add=True)
-    date_of_birth = models.DateField(null=True)
+    # #date_of_birth = models.DateField(null=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=True)
 
