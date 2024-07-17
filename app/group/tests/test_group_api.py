@@ -159,22 +159,14 @@ class PrivateGroupAPITests(TestCase):
         )
 
         group1 = create_group(user2, group_name="Test Group 1")
-        membership = create_group_membership(user2, group1, 'Admin')
+        create_group_membership(user2, group1, 'Admin')
 
         create_group_membership(self.user, group1, 'Member')
         create_group_membership(user3, group1, 'Member')
 
-        print('TTTTTTTTTTTTTTTT')
-        print(GROUP_MEMBERS_URL)
-        print('TTTTTTTTTTTTTTTT')
         res = self.client.get(GROUP_MEMBERS_URL, {'group_id': group1.id})
         group_membership = GroupMembership.objects.filter(group=group1)
         serializer = GroupMembersListSerializer(group_membership, many=True)
-
-        print('TTTTTTTTTTTTTTTT')
-        print(res.data)
-        print('TTTTTTTTTTTTTTTT')
-        print(membership.member_role)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data, serializer.data)

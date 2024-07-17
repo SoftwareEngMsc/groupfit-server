@@ -62,9 +62,7 @@ class GroupViewSet(mixins.CreateModelMixin,
     @action(detail=False, methods=['GET'])
     def members(self, request):
         """Custom action for getting list of members for a given group"""
-        # print('***********')
-        # print(pk)
-        # print('***********')
+
         group_id = self.request.query_params.get('group_id')
         serializer = self.get_serializer(
             self.queryset.filter(group_id=group_id), many=True)
@@ -249,8 +247,26 @@ class GroupWorkoutViewSet(mixins.CreateModelMixin,
 
         queryset_res = GroupWorkoutEvidence.objects.filter(
             workout_id=workout_id, member_id=member_id)
+
         serializer = self.get_serializer(queryset_res, many=True)
 
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['GET'])
+    def evidenceLog(self, request, pk=None, *args, **kwargs):
+        """updates member role in given group"""
+        member_id = self.request.query_params['member_id']
+        group_id = self.request.query_params['group_id']
+
+        workout_ids = GroupWorkout.objects.filter(
+            group_id=group_id).values_list('id')
+
+        workout_ids = list(map(lambda x: x[0], workout_ids))
+
+        queryset_res = GroupWorkoutEvidence.objects.filter(
+            member_id=member_id, workout_id__in=workout_ids)
+
+        serializer = self.get_serializer(queryset_res, many=True)
         return Response(serializer.data)
 
     @action(detail=True, methods=['POST'])
@@ -278,7 +294,7 @@ class GroupWorkoutViewSet(mixins.CreateModelMixin,
     def get_serializer_class(self):
         """Return the serializer class  for  request"""
 
-        if self.action == "evidence":
+        if self.action == "evidence" or self.action == "evidenceLog":
             return serializers.GroupWorkoutEvidenceSerializer
         elif self.action == 'uploadEvidence':
             return serializers.WorkoutEvidenceImageSerializer

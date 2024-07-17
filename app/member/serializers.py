@@ -21,8 +21,6 @@ class MemberSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         """create and return a member with encrypted password"""
-        print(validated_data)
-
         return get_user_model().objects.create_user(**validated_data)
 
     def update(self, instance, validated_data):

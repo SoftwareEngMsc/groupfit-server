@@ -22,8 +22,10 @@ GROUP_ADD_WORKOUT_URL = reverse(
     'group:workout-addWorkout', kwargs={'pk': None})
 GROUP_DELETE_WORKOUT_URL = reverse(
     'group:workout-deleteWorkout', kwargs={'pk': None})
-GROUP_WORKOUT_EVIDENCE_URL = reverse(
+GROUP_WORKOUT_EVIDENCE_FOR_MEMBER_URL = reverse(
     'group:workout-evidence', kwargs={'pk': None})
+GROUP_WORKOUT_EVIDENCE_LOG_FOR_MEMBER_URL = reverse(
+    'group:workout-evidenceLog', kwargs={'pk': None})
 GROUP_WORKOUT_UPLOAD_EVIDENCE_URL = reverse(
     'group:workout-uploadEvidence', kwargs={'pk': None})
 
@@ -178,7 +180,7 @@ class PrivateGroupWorkoutAPITests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(workout.count(), 0)
 
-    def test_get_workout_evidence_for_group_member(self):
+    def test_get_workout_evidence_for_group_member_by_workout(self):
         """Tests retrieving workouts evidence for a group member"""
         workout_params = {
             'name': 'Test Workout',
@@ -193,11 +195,56 @@ class PrivateGroupWorkoutAPITests(TestCase):
             self.user, workout, **evidence_params)
 
         # TODO:  Create URL helper functions - check entire codebase
-        res = self.client.get(GROUP_WORKOUT_EVIDENCE_URL, {
+        res = self.client.get(GROUP_WORKOUT_EVIDENCE_FOR_MEMBER_URL, {
                               'member_id': self.user.id,
                               'workout_id': workout.id})
         workout_evidence = GroupWorkoutEvidence.objects.filter(
             workout=workout, member=self.user)
+
+        serializer = GroupWorkoutEvidenceSerializer(
+            workout_evidence, many=True)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data, serializer.data)
+
+    def test_get_all_workout_evidence_for_group_member(self):
+        """Tests retrieving workouts evidence for a group member"""
+
+        evidence_params1 = {
+            'comment': 'Fab workout!',
+        }
+        evidence_params2 = {
+            'comment': 'Fab workout!',
+        }
+
+        group = create_group(self.user)
+        create_group_membership(self.user, group, 'Admin')
+
+        workout1 = GroupWorkout.objects.create(
+            group=group,
+            name='Test Workout',
+            description='Full body workout',
+            link='http://test.co.uk',
+        )
+
+        workout2 = GroupWorkout.objects.create(
+            group=group,
+            name='Test Workout2',
+            description='Arm workout',
+            link='http://test.co.uk',
+        )
+
+        create_workout_evidence(
+            self.user, workout1, ** evidence_params1)
+        create_workout_evidence(
+            self.user, workout2, **evidence_params2)
+
+        # TODO:  Create URL helper functions - check entire codebase
+        print(GROUP_WORKOUT_EVIDENCE_LOG_FOR_MEMBER_URL)
+        res = self.client.get(GROUP_WORKOUT_EVIDENCE_LOG_FOR_MEMBER_URL, {
+                              'member_id': self.user.id,
+                              'group_id': group.id})
+        workout_evidence = GroupWorkoutEvidence.objects.filter(
+            member=self.user, workout_id__in=[workout1.id, workout2.id])
 
         serializer = GroupWorkoutEvidenceSerializer(
             workout_evidence, many=True)
