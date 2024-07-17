@@ -11,9 +11,10 @@ from rest_framework.test import APIClient
 
 from core.models import Group, GroupMembership
 from group.serializers import (GroupMembershipSerializer,
-                               GroupMembersListSerializer)
+                               GroupMembersListSerializer, GroupSerializer)
 
 GROUPS_URL = reverse('group:group-list')
+GROUPS_URL_CUSTOM = reverse('group:group-getGroups')
 GROUP_MEMBERS_URL = reverse('group:group-members')
 GROUP_ADD_MEMBER_URL = reverse('group:group-addMember')
 GROUP_UPDATE_MEMBER_URL = reverse(
@@ -74,6 +75,21 @@ class PrivateGroupAPITests(TestCase):
             # date_of_birth='1988-09-21',
         )
         self.client.force_authenticate(self.user)
+
+    def test_custom_get_groups_for_user(self):
+        """Tests retrieving groups for the user"""
+
+        group1 = create_group(self.user, group_name="Test Group 1")
+        create_group_membership(self.user, group1, 'Admin')
+
+        group2 = create_group(self.user, group_name="Test Group 2")
+        create_group_membership(self.user, group2, 'Admin')
+
+        res = self.client.get(GROUPS_URL_CUSTOM)
+        groups = Group.objects.all()  # .order_by['-id']
+        serializer = GroupSerializer(groups, many=True)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data, serializer.data)
 
     def test_get_groups_for_user(self):
         """Tests retrieving groups for the user"""
@@ -143,14 +159,22 @@ class PrivateGroupAPITests(TestCase):
         )
 
         group1 = create_group(user2, group_name="Test Group 1")
-        create_group_membership(user2, group1, 'Admin')
+        membership = create_group_membership(user2, group1, 'Admin')
 
         create_group_membership(self.user, group1, 'Member')
         create_group_membership(user3, group1, 'Member')
 
+        print('TTTTTTTTTTTTTTTT')
+        print(GROUP_MEMBERS_URL)
+        print('TTTTTTTTTTTTTTTT')
         res = self.client.get(GROUP_MEMBERS_URL, {'group_id': group1.id})
         group_membership = GroupMembership.objects.filter(group=group1)
         serializer = GroupMembersListSerializer(group_membership, many=True)
+
+        print('TTTTTTTTTTTTTTTT')
+        print(res.data)
+        print('TTTTTTTTTTTTTTTT')
+        print(membership.member_role)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data, serializer.data)

@@ -47,7 +47,7 @@ class GroupMembersListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = GroupMembership
-        fields = ['member']
+        fields = ['member', 'group', 'member_role']
 
 
 class GroupWorkoutSerializer(serializers.ModelSerializer):

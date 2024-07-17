@@ -33,6 +33,18 @@ class GroupViewSet(mixins.CreateModelMixin,
 
         return self.queryset.filter(member=self.request.user)
 
+    @action(detail=False, methods=['GET'])
+    def getGroups(self, request):
+        """Custom action for getting groups for user"""
+
+        group_ids = list(self.get_queryset().values_list('group'))
+        group_ids = list(map(lambda x: x[0], group_ids))
+
+        groups = Group.objects.filter(id__in=group_ids)
+        serializer = self.get_serializer(groups, many=True)
+
+        return Response(serializer.data)
+
     @action(detail=True, methods=['DELETE'])
     def deleteGroup(self, request, *args, **kwargs):
         """deletes the group"""
@@ -50,7 +62,9 @@ class GroupViewSet(mixins.CreateModelMixin,
     @action(detail=False, methods=['GET'])
     def members(self, request):
         """Custom action for getting list of members for a given group"""
-
+        # print('***********')
+        # print(pk)
+        # print('***********')
         group_id = self.request.query_params.get('group_id')
         serializer = self.get_serializer(
             self.queryset.filter(group_id=group_id), many=True)
@@ -144,6 +158,8 @@ class GroupViewSet(mixins.CreateModelMixin,
         if self.action == "members":
             return serializers.GroupMembersListSerializer
         elif self.action == "create":
+            return serializers.GroupSerializer
+        elif self.action == "getGroups":
             return serializers.GroupSerializer
 
         return self.serializer_class
