@@ -68,6 +68,21 @@ class GroupViewSet(mixins.CreateModelMixin,
             self.queryset.filter(group_id=group_id), many=True)
         return Response(serializer.data)
 
+    @action(detail=False, methods=['GET'])
+    def getGroupmember(self, request):
+        """Custom action for getting list of members for a given group"""
+
+        group_id = self.request.query_params.get('group_id')
+        member_id = self.request.query_params.get('member_id')
+        member = self.queryset.filter(
+            group_id=group_id, member_id=member_id).first()
+
+        print(member)
+        serializer = self.get_serializer(
+            member)
+        print(serializer)
+        return Response(serializer.data)
+
     @action(detail=False, methods=['POST'])
     def addMember(self, request):
         """Adds the membe to the group"""
@@ -241,7 +256,7 @@ class GroupWorkoutViewSet(mixins.CreateModelMixin,
 
     @action(detail=True, methods=['GET'])
     def evidence(self, request, pk=None, *args, **kwargs):
-        """updates member role in given group"""
+
         member_id = self.request.query_params['member_id']
         workout_id = self.request.query_params['workout_id']
 
@@ -254,7 +269,7 @@ class GroupWorkoutViewSet(mixins.CreateModelMixin,
 
     @action(detail=True, methods=['GET'])
     def evidenceLog(self, request, pk=None, *args, **kwargs):
-        """updates member role in given group"""
+
         member_id = self.request.query_params['member_id']
         group_id = self.request.query_params['group_id']
 
@@ -269,32 +284,74 @@ class GroupWorkoutViewSet(mixins.CreateModelMixin,
         serializer = self.get_serializer(queryset_res, many=True)
         return Response(serializer.data)
 
+    @action(detail=True, methods=['GET'])
+    def groupEvidenceLog(self, request, pk=None, *args, **kwargs):
+
+        group_id = self.request.query_params['group_id']
+
+        workout_ids = GroupWorkout.objects.filter(
+            group_id=group_id).values_list('id')
+
+        workout_ids = list(map(lambda x: x[0], workout_ids))
+
+        queryset_res = GroupWorkoutEvidence.objects.filter(
+            workout_id__in=workout_ids)
+
+        serializer = self.get_serializer(queryset_res, many=True)
+        return Response(serializer.data)
+
     @action(detail=True, methods=['POST'])
     def uploadEvidence(self, request, pk=None, *args, **kwargs):
         """uploads workout evidence"""
 
         workout_id = self.request.data.get('workout_id')
         evidence = self.request.data.get('evidence_image')
+        comment = self.request.data.get('comment')
+        print('EVIDENCE!!!!!!')
+        print(evidence)
+        print(workout_id)
+        print(comment)
+        # workout_evidence = GroupWorkoutEvidence.objects.filter(
+        #     workout_id=workout_id, member_id=self.request.user.id).first()
+        workout = self.queryset.filter(id=workout_id).first()
 
-        workout_evidence = GroupWorkoutEvidence.objects.filter(
-            workout_id=workout_id, member_id=self.request.user.id).first()
+        workout_evidence = GroupWorkoutEvidence.objects.create(
+            member=self.request.user,
+            workout=workout,
+            evidence_image=evidence,
+            comment=comment
+        )
 
-        serializer = self.get_serializer(
-            workout_evidence, data={'member': workout_evidence.member.id,
-                                    'workout': workout_evidence.workout.id,
-                                    'evidence_image': evidence})
+        workout_evidence.save()
+        serializer = self.get_serializer(workout_evidence)
 
-        if serializer.is_valid():
-            serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-            return Response(serializer.data, status=status.HTTP_200_OK)
+    @action(detail=True, methods=['DELETE'])
+    def deleteWorkoutEvidence(self, request, pk=None):
+        """deletes workout evidence in given group"""
+        print(request.query_params)
+        print(self.request.data)
+        workout_evidence_id = request.data['workout_evidence_id']
+        print(self.request.query_params)
+        print(workout_evidence_id)
+        workout_evidence_to_delete = GroupWorkoutEvidence.objects.filter(
+            id=workout_evidence_id, member_id=self.request.user.id).first()
+        print(workout_evidence_to_delete)
+        if not workout_evidence_to_delete:
+            return Response({'message': """Workout evidence does not exist
+                             for this user in given group"""
+                             }, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        workout_evidence_to_delete.delete()
+        return Response({'res': 'Workout Evidence successfully deleted.'},
+                        status=status.HTTP_204_NO_CONTENT)
 
     def get_serializer_class(self):
         """Return the serializer class  for  request"""
 
-        if self.action == "evidence" or self.action == "evidenceLog":
+        if (self.action == "evidence" or self.action == "evidenceLog"
+                or self.action == "groupEvidenceLog"):
             return serializers.GroupWorkoutEvidenceSerializer
         elif self.action == 'uploadEvidence':
             return serializers.WorkoutEvidenceImageSerializer

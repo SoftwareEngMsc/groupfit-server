@@ -16,6 +16,7 @@ from group.serializers import (GroupMembershipSerializer,
 GROUPS_URL = reverse('group:group-list')
 GROUPS_URL_CUSTOM = reverse('group:group-getGroups')
 GROUP_MEMBERS_URL = reverse('group:group-members')
+GET_GROUP_MEMBER_URL = reverse('group:group-getGroupmember')
 GROUP_ADD_MEMBER_URL = reverse('group:group-addMember')
 GROUP_UPDATE_MEMBER_URL = reverse(
     'group:group-updateMember', kwargs={'pk': None})
@@ -167,6 +168,34 @@ class PrivateGroupAPITests(TestCase):
         res = self.client.get(GROUP_MEMBERS_URL, {'group_id': group1.id})
         group_membership = GroupMembership.objects.filter(group=group1)
         serializer = GroupMembersListSerializer(group_membership, many=True)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data, serializer.data)
+
+    def test_retrieve_group_member(self):
+        """Tests that custom action returns specified group member"""
+        user2 = get_user_model().objects.create_user(
+            email='testUser2@example.com',
+            password='testPass111',
+            # date_of_birth='1990-05-09',
+        )
+        user3 = get_user_model().objects.create_user(
+            email='testUser3@example.com',
+            password='testPass221',
+            # date_of_birth='1993-02-11',
+        )
+
+        group1 = create_group(user2, group_name="Test Group 1")
+        create_group_membership(user2, group1, 'Admin')
+
+        create_group_membership(self.user, group1, 'Member')
+        create_group_membership(user3, group1, 'Member')
+
+        res = self.client.get(GET_GROUP_MEMBER_URL, {'group_id': group1.id,
+                                                     'member_id': user2.id})
+        group_member = GroupMembership.objects.filter(
+            group=group1, member=user2).first()
+        serializer = GroupMembershipSerializer(group_member)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data, serializer.data)

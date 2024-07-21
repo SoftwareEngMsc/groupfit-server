@@ -79,6 +79,7 @@ class WorkoutEvidenceImageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = GroupWorkoutEvidence
-        fields = ['id', 'member', 'workout', 'evidence_image']
-        read_only_fields = ['id']
+        fields = ['id', 'member', 'workout',
+                  'evidence_image', 'comment', 'submission_date']
+        read_only_fields = ['id', 'submission_date']
         extra_kwargs = {'evidence_image': {'required': 'True'}}
