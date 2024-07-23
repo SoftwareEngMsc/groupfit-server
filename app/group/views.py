@@ -77,10 +77,9 @@ class GroupViewSet(mixins.CreateModelMixin,
         member = self.queryset.filter(
             group_id=group_id, member_id=member_id).first()
 
-        print(member)
         serializer = self.get_serializer(
             member)
-        print(serializer)
+
         return Response(serializer.data)
 
     @action(detail=False, methods=['POST'])
@@ -307,12 +306,7 @@ class GroupWorkoutViewSet(mixins.CreateModelMixin,
         workout_id = self.request.data.get('workout_id')
         evidence = self.request.data.get('evidence_image')
         comment = self.request.data.get('comment')
-        print('EVIDENCE!!!!!!')
-        print(evidence)
-        print(workout_id)
-        print(comment)
-        # workout_evidence = GroupWorkoutEvidence.objects.filter(
-        #     workout_id=workout_id, member_id=self.request.user.id).first()
+
         workout = self.queryset.filter(id=workout_id).first()
 
         workout_evidence = GroupWorkoutEvidence.objects.create(
@@ -330,14 +324,12 @@ class GroupWorkoutViewSet(mixins.CreateModelMixin,
     @action(detail=True, methods=['DELETE'])
     def deleteWorkoutEvidence(self, request, pk=None):
         """deletes workout evidence in given group"""
-        print(request.query_params)
-        print(self.request.data)
+
         workout_evidence_id = request.data['workout_evidence_id']
-        print(self.request.query_params)
-        print(workout_evidence_id)
+
         workout_evidence_to_delete = GroupWorkoutEvidence.objects.filter(
             id=workout_evidence_id, member_id=self.request.user.id).first()
-        print(workout_evidence_to_delete)
+
         if not workout_evidence_to_delete:
             return Response({'message': """Workout evidence does not exist
                              for this user in given group"""

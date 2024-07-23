@@ -343,7 +343,7 @@ class UploadEvidenceTests(TestCase):
                 'workout_id': self.workout_evidence.workout.id,
                 'comment': 'Excellent Workout'
             }
-            print(evidence_file)
+
             res = self.client.post(
                 GROUP_WORKOUT_UPLOAD_EVIDENCE_URL,
                 payload,  format='multipart')
@@ -351,7 +351,7 @@ class UploadEvidenceTests(TestCase):
         self.workout_evidence.refresh_from_db()
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         self.assertIn('evidence_image', res.data)
-        print(res.data)
+
         # self.assertTrue(os.path.exists(
         #     self.workout_evidence.evidence_image.path))
 
@@ -364,7 +364,6 @@ class UploadEvidenceTests(TestCase):
     #                }
     #     res = self.client.post(
     #         GROUP_WORKOUT_UPLOAD_EVIDENCE_URL, payload,  format='multipart')
-    #     print(res.data)
     #     self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_delete_workout_evidence(self):
@@ -381,12 +380,6 @@ class UploadEvidenceTests(TestCase):
 
         workout_evidence_to_delete = create_workout_evidence(
             self.user, workout, **evidence_params)
-
-        print('GGGGGGGGGGGGGGG')
-        print(workout_evidence_to_delete.id)
-        # res = self.client.delete(
-        #     GROUP_DELETE_WORKOUT_EVIDENCE_URL,
-        #     {'workout_evidence_id': workout_evidence_to_delete.id})
 
         res = self.client.delete(
             GROUP_DELETE_WORKOUT_EVIDENCE_URL, {

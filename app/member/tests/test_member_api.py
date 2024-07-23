@@ -2,6 +2,7 @@
 Tests for the member API
 """
 
+from collections import OrderedDict
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.urls import reverse
@@ -13,6 +14,7 @@ from rest_framework import status
 CREATE_MEMBER_URL = reverse('member:create')
 TOKEN_URL = reverse('member:token')
 ME_URL = reverse('member:me')
+SEARCH_URL = reverse('member:member-getMemberSearchResults')
 
 
 def create_member(**params):
@@ -169,3 +171,32 @@ class PrivateMemberApiTests(TestCase):
         self.assertEqual(self.member.first_name, payload['first_name'])
         self.assertTrue(self.member.check_password(payload['password']))
         self.assertEqual(res.status_code, status.HTTP_200_OK)
+
+    def test_get_member_search_results(self):
+
+        user2 = create_member(
+            email='test2@example.com',
+            password='pass123',
+            first_name='Test2 First Name',
+            last_name='Test2 Last Name',
+            # date_of_birth='1988-09-21',
+        )
+
+        user3 = create_member(
+            email='tesss3@example.com',
+            password='past123',
+            first_name='Tessss3 First Name',
+            last_name='Tessss3 Last Name',
+            # date_of_birth='1988-09-21',
+        )
+
+        res = self.client.get(SEARCH_URL, {'search_string': 'Test'})
+
+        first_names = []
+
+        for val in res.data:
+            first_names.append(val['first_name'])
+
+        self.assertIn(self.member.first_name, first_names)
+        self.assertIn(user2.first_name, first_names)
+        self.assertNotIn(user3.first_name, first_names)
