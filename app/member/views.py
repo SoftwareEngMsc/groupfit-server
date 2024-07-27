@@ -67,3 +67,18 @@ class MemberViewSet(mixins.RetrieveModelMixin,
         serializer = self.get_serializer(result, many=True)
 
         return Response(serializer.data)
+
+    @action(detail=True, methods=['DELETE'])
+    def deleteMember(self, request, pk=None):
+        """deletes member"""
+        member_id = self.request.data.get('member_id')
+
+        member_to_delete = get_user_model().objects.filter(id=member_id).first()
+
+        if not member_to_delete:
+            return Response({'message': 'Member does not exist'
+                             }, status=status.HTTP_400_BAD_REQUEST)
+
+        member_to_delete.delete()
+        return Response({'res': 'Member successfully deleted '},
+                        status=status.HTTP_204_NO_CONTENT)

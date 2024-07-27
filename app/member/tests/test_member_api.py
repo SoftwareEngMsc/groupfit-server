@@ -15,6 +15,7 @@ CREATE_MEMBER_URL = reverse('member:create')
 TOKEN_URL = reverse('member:token')
 ME_URL = reverse('member:me')
 SEARCH_URL = reverse('member:member-getMemberSearchResults')
+DELETE_MEMBER_URL = reverse('member:member-deleteMember', kwargs={'pk': None})
 
 
 def create_member(**params):
@@ -171,6 +172,17 @@ class PrivateMemberApiTests(TestCase):
         self.assertEqual(self.member.first_name, payload['first_name'])
         self.assertTrue(self.member.check_password(payload['password']))
         self.assertEqual(res.status_code, status.HTTP_200_OK)
+
+    def test_delete_member_profile(self):
+        """Tests member profile can be deleted"""
+        payload = {'member_id': self.member.id}
+
+        res = self.client.delete(DELETE_MEMBER_URL, payload)
+
+        member = get_user_model().objects.filter(id=self.member.id)
+
+        self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(member.count(), 0)
 
     def test_get_member_search_results(self):
 
