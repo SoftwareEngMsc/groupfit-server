@@ -2,8 +2,6 @@
 URL mappings for the member API.
 """
 
-from django.urls import path
-
 from member import views
 from django.urls import (path, include)
 

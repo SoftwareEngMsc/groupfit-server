@@ -16,7 +16,6 @@ from member.serializers import (
 
 from django.contrib.auth import (
     get_user_model,
-    authenticate,
 )
 
 
@@ -73,7 +72,8 @@ class MemberViewSet(mixins.RetrieveModelMixin,
         """deletes member"""
         member_id = self.request.data.get('member_id')
 
-        member_to_delete = get_user_model().objects.filter(id=member_id).first()
+        member_to_delete = get_user_model().objects.filter(
+            id=member_id).first()
 
         if not member_to_delete:
             return Response({'message': 'Member does not exist'
