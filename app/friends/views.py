@@ -77,15 +77,12 @@ class FriendsViewSet(mixins.CreateModelMixin,
     def response(self, request, pk=None):
         """Custom action for accepting or rejecting a friend"""
 
-        user_id = self.request.data.get('user_id')
+        # user_id = self.request.data.get('user_id')
         friend_conn_id = self.request.data.get('friend_conn_id')
         new_status = self.request.data.get('status')
 
-        user = get_user_model().objects.filter(
-            id=user_id).first()
-
         friend_connection = self.queryset.filter(
-            Q(id=friend_conn_id) & Q(user2=user)
+            Q(id=friend_conn_id)
             & Q(status='Pending')).first()
 
         if not friend_connection:
@@ -93,19 +90,24 @@ class FriendsViewSet(mixins.CreateModelMixin,
             return Response({'message': 'No valid friend Connection found'},
                             status=status.HTTP_400_BAD_REQUEST)
 
-        data_to_update = {
-            'status': new_status,
-            'connected_date': datetime.today().strftime('%Y-%m-%d')
-        }
-        serializer = self.get_serializer(instance=friend_connection,
-                                         data=data_to_update,
-                                         partial=True
-                                         )
+        if (new_status == 'Accepted'):
+            data_to_update = {
+                'status': new_status,
+                'connected_date': datetime.today().strftime('%Y-%m-%d')
+            }
+            serializer = self.get_serializer(instance=friend_connection,
+                                             data=data_to_update,
+                                             partial=True
+                                             )
 
-        if serializer.is_valid():
-            serializer.save()
+            if serializer.is_valid():
+                serializer.save()
 
-            return Response(serializer.data, status=status.HTTP_200_OK)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            self.perform_destroy(friend_connection)
+            return Response({'message': 'Friend Connection Rejected'},
+                            status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=['DELETE'])

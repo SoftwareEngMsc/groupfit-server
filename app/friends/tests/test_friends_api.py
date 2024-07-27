@@ -124,7 +124,6 @@ class PrivateFriendsAPITests(TestCase):
         updated_status = 'Accepted'
         response = {
             'friend_conn_id': friend_connection.id,
-            'user_id': user2.id,
             'status': updated_status,
         }
         res = self.client.patch(FRIENDS_ACCEPT_REJECT_RESPONSE_URL, response)
@@ -150,15 +149,18 @@ class PrivateFriendsAPITests(TestCase):
         updated_status = 'Rejected'
         response = {
             'friend_conn_id': friend_connection.id,
-            'user_id': user2.id,
             'status': updated_status,
         }
         res = self.client.patch(FRIENDS_ACCEPT_REJECT_RESPONSE_URL, response)
 
-        friend_connection.refresh_from_db()
+        print(res)
+        friend_connection_updated = Friends.objects.filter(
+            id=friend_connection.id)
+
+        self.assertEqual(friend_connection_updated.count(), 0)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertEqual(friend_connection.status, updated_status)
+        # self.assertEqual(res.message, 'Friend Connection Rejected')
 
     def test_delete_friend(self):
         """Tests a friend can be deleted"""
@@ -177,7 +179,6 @@ class PrivateFriendsAPITests(TestCase):
         updated_status = 'Rejected'
         response = {
             'friend_conn_id': friend_connection_to_delete.id,
-            'user_id': user2.id,
             'status': updated_status,
         }
 
