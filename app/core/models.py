@@ -52,7 +52,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
     join_date = models.DateField(auto_now_add=True)
-    # #date_of_birth = models.DateField(null=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=True)
 
@@ -80,7 +79,7 @@ class GroupMembership(models.Model):
 
 
 class GroupWorkout(models.Model):
-    """exercise workout for group"""
+    """Exercise workout for group"""
     name = models.CharField(max_length=255)
     description = models.TextField()
     link = models.URLField(max_length=255)
