@@ -67,8 +67,8 @@ MIDDLEWARE = [
 ]
 
 INTERNAL_IPS = [
-    # '127.0.0.1',
-    '0.0.0.0'
+    '127.0.0.1',
+    '18.212.112.78'
 ]
 
 # CORS_ALLOWED_ORIGINS = [
